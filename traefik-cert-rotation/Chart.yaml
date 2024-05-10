@@ -1,7 +1,7 @@
 apiVersion: v2
 name: traefik-cert-rotation
 type: application
-version: 0.0.0
+version: 0.0.3
 appVersion: 0.0.0
 home: https://github.com/Sanjiv-Madhavan/Traefik-Cert-Rotation
 sources:

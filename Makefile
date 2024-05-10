@@ -1,4 +1,4 @@
-VERSION ?= 0.0.2
+VERSION ?= 0.0.3
 IMAGE_TAG_BASE ?= docker.io/sanjivmadhavan/traefik-cert-rotation
 BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 IMG ?= $(IMAGE_TAG_BASE):$(VERSION)
