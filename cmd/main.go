@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Sanjiv-Madhavan/Traefik-Cert-Rotation/internal/config"
+	"github.com/Sanjiv-Madhavan/Traefik-Cert-Rotation/internal/controllers"
 	"github.com/borchero/zeus/pkg/zeus"
 	certmanager "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	traefik "github.com/traefik/traefik/v2/pkg/provider/kubernetes/crd/traefikio/v1alpha1"
@@ -16,6 +17,7 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/external-dns/endpoint"
 
@@ -24,7 +26,8 @@ import (
 
 func main() {
 	var cfgFile string
-	flag.StringVar(&cfgFile, "config", "/Users/i513687/Documents/GitHub/Sanjivmadhavan/switchboard/dev/config.yaml", "The config file to use.")
+	// for local: "/Users/i513687/Documents/GitHub/Sanjivmadhavan/traefik-cert-rotation/dev/config.yaml"
+	flag.StringVar(&cfgFile, "config", "/etc/traefik-cert-rotation/config.yaml", "The config file to use.")
 	flag.Parse()
 
 	// Initialize logger
@@ -37,7 +40,7 @@ func main() {
 	if cfgFile != "" {
 		contents, err := os.ReadFile(cfgFile)
 		if err != nil {
-			logger.Fatal("failed to read config file", zap.Error(err))
+			logger.Fatal("failed to read configs file", zap.Error(err))
 		}
 		if err := yaml.Unmarshal(contents, &config); err != nil {
 			logger.Fatal("failed to parse config file", zap.Error(err))
@@ -56,6 +59,35 @@ func main() {
 		HealthProbeBindAddress: config.Health.HealthProbeBindAddress,
 	}
 	initScheme(config, options.Scheme)
+
+	manager, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
+	if err != nil {
+		logger.Fatal("Unable to create manager", zap.Error(err))
+	}
+
+	// create controller to register with manager
+	controller, err := controllers.NewIngressRouteReconciler(manager.GetClient(), logger, config)
+	if err != nil {
+		logger.Fatal("unable to initialize ingress route controller", zap.Error(err))
+	}
+	if err := controller.SetupWithManager(manager); err != nil {
+		logger.Fatal("unable to start ingress route controller", zap.Error(err))
+	}
+
+	// Add health check endpoints
+	if err := manager.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+		logger.Fatal("unable to set up ready check at /readyz", zap.Error(err))
+	}
+	if err := manager.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+		logger.Fatal("unable to set up health check at /healthz", zap.Error(err))
+	}
+
+	// Start the manager
+	logger.Info("launching manager")
+	if err := manager.Start(ctrl.SetupSignalHandler()); err != nil {
+		logger.Fatal("failed to run manager", zap.Error(err))
+	}
+	logger.Info("gracefully shut down")
 }
 
 func initScheme(config config.Config, scheme *runtime.Scheme) {

@@ -1,0 +1,20 @@
+apiVersion: v2
+name: traefik-cert-rotation
+type: application
+version: 0.0.0
+appVersion: 0.0.0
+home: https://github.com/Sanjiv-Madhavan/Traefik-Cert-Rotation
+sources:
+  - https://github.com/Sanjiv-Madhavan/Traefik-Cert-Rotation
+
+# dependencies:
+#   - name: external-dns
+#     version: 6.15.1
+#     repository: https://charts.bitnami.com/bitnami
+#     condition: external-dns.install
+
+#   - name: cert-manager
+#     version: 1.11.0
+#     repository: https://charts.jetstack.io
+#     condition: cert-manager.install
+

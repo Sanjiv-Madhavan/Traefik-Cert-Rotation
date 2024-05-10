@@ -1,15 +1,20 @@
 health:
-  healthProbeBindAddress: :8081
+  healthProbeBindAddress: ":8081"
 leaderElection:
   leaderElect: false
-  resourceName: github.sanjivmadhavan.io
-  resourceNamespace: default
+  resourceName: "github.sanjivmadhavan.io"
+  resourceNamespace: "default"
 integrations:
-  externalDns:
-    target:
-      name: kube-dns
-      namespace: kube-system
+  externalDNS:
+    targetService:
+      name: "kube-dns"
+      namespace: "kube-system"
   certManager:
-    issuer:
-      kind: ClusterIssuer
-      name: ca-issuer
+    template:
+      spec:
+        commonName: "example.com"
+        dnsNames:
+          - "example.com"
+        issuerRef:
+          name: "ca-issuer"
+          kind: "ClusterIssuer"
