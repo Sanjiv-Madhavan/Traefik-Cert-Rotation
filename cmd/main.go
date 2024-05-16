@@ -18,6 +18,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/external-dns/endpoint"
 
@@ -27,9 +28,9 @@ import (
 func main() {
 	var cfgFile string
 	// for local: "/Users/i513687/Documents/GitHub/Sanjivmadhavan/traefik-cert-rotation/dev/config.yaml"
-	flag.StringVar(&cfgFile, "config", "/etc/traefik-cert-rotation/config.yaml", "The config file to use.")
+	// for dev cluster: "/etc/traefik-cert-rotation/config.yaml"
+	flag.StringVar(&cfgFile, "config", "/Users/i513687/Documents/GitHub/Sanjivmadhavan/traefik-cert-rotation/dev/config.yaml", "The config file to use.")
 	flag.Parse()
-
 	// Initialize logger
 	ctx := context.Background()
 	logger := zeus.Logger(ctx)
@@ -46,6 +47,12 @@ func main() {
 			logger.Fatal("failed to parse config file", zap.Error(err))
 		}
 	}
+
+	opts := ctrlzap.Options{
+		Development: true,
+	}
+
+	ctrl.SetLogger(ctrlzap.New(ctrlzap.UseFlagOptions(&opts)))
 
 	// Initialize the options and the schema
 	options := ctrl.Options{
