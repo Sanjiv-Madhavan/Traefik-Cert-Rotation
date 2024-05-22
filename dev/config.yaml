@@ -10,7 +10,7 @@ integrations:
       name: "kube-dns"
       namespace: "kube-system"
   certManager:
-    certificateTemplate:
+    template:
       spec:
         commonName: "example.com"
         dnsNames:
