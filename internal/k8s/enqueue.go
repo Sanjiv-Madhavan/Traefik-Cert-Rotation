@@ -20,7 +20,7 @@ func EnqueueMapFunc[L client.ObjectList](
 ) func(context.Context, client.Object) []reconcile.Request {
 	// this return function is the event handler for watcher setup
 	return func(ctx context.Context, obj client.Object) []reconcile.Request {
-		// Check whether we need to enqueue any objects
+		// Check whether we dont need to enqueue any objects
 		if !(target.GetObjectKind() == obj.GetObjectKind() &&
 			target.GetNamespace() == obj.GetNamespace() &&
 			target.GetName() == obj.GetName()) {

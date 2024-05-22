@@ -42,11 +42,19 @@ integrations:
     #    via `integrations.certManager.issuer` or letting the chart create its own issuer by
     #    setting `certificateIssuer.create = true` and specifying additional properties for the
     #    certificate issuer.
-    enabled: false
+    enabled: true
     # -- The certificate template to use when creating certificates via the cert-manager
     #    integration. Unless `certificateIssuer.create` is set to `true` when installing this
     #    chart, setting `.spec.IssuerRef` is required.
-    certificateTemplate: {}
+    certificateTemplate: 
+      spec:
+          commonName: "example.com"
+          dnsNames:
+            - "example.com"
+          issuerRef:
+            name: "ca-issuer"
+            kind: "ClusterIssuer"
+    
   externalDNS:
     # -- Whether the external-dns integration should be enabled. If enabled `DNSEndpoint` resources
     #    are created by traefik-cert-rotation. Setting this to `true` requires specifying the target via
